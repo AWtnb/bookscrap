@@ -1,218 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
     <!-- Chrome / Firefox / Edge -->
-    <link rel="icon"
-        href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20style%3D%22dominant-baseline%3Acentral%3Btext-anchor%3Amiddle%3Bfont-size%3A90px%3B%22%3E%F0%9F%93%9A%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20style%3D%22dominant-baseline%3Acentral%3Btext-anchor%3Amiddle%3Bfont-size%3A90px%3B%22%3E%F0%9F%93%9A%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E"
+    />
     <!-- Safari / IE -->
-    <link rel="icon alternate" type="image/png"
-        href="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/72x72/1f4da.png" />
+    <link
+      rel="icon alternate"
+      type="image/png"
+      href="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/72x72/1f4da.png"
+    />
     <title>BOOK-SCRAP</title>
-    <link rel="stylesheet" type="text/css" href="./milligram.min.css">
-    <link rel="stylesheet" type="text/css" href="./additional.css">
-</head>
+    <link rel="stylesheet" type="text/css" href="./milligram.min.css" />
+    <link rel="stylesheet" type="text/css" href="./additional.css" />
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <div id="app">
-            <div class="isbn">
-                <div class="preview" v-cloak>{{isbnFormat}}</div>
-                <div class="searchBox">
-                    <input type="tel" v-model="bookNum" ref="userInput" @keydown.enter="fetchData"
-                        @keyup.enter="fetchData">
-                    <button class="clear-button" @click="clearBox" tabindex="-1">&times;</button>
-                </div>
-                <div class="buttonBox">
-                    <button @click="fetchData">Go</button>
-                    <label><input type="checkbox" v-model="searchOnGoogleBooks">GoogleBooks</label>
-                </div>
-            </div>
-            <div class="database-record" v-cloak>{{databaseRecord}}</div>
-            <details>
-                <summary>Configure</summary>
-                <label>Title<input type="text" v-model="title"></label>
-                <label class="sub">Subtitle<input type="text" v-model="subtitle"><button class="clear-button"
-                        @click="clearSubtitle" tabindex="-1">&times;</button></label>
-                <label>Publisher<input type="text" v-model="publisherName"></label>
-                <label>Publish Year<input type="tel" v-model="pubYear"></label>
-                <label>Tags (space-separated)<input type="text" v-model="authorInfo"></label>
-            </details>
-            <button @click="copyFileName" :class="{done:fileNameCopied}" class="button-outline">Copy FileName</button>
-            <div class="front-matter">
-                <textarea readonly tabindex="-1" v-model="frontMatter"></textarea>
-                <button @click="copyFrontMatter" :class="{done:frontMatterCopied}">Copy</button>
-            </div>
+      <div id="app">
+        <div class="isbn">
+          <div class="preview" v-cloak>{{isbnFormat}}</div>
+          <div class="searchBox">
+            <input
+              type="tel"
+              v-model="bookNum"
+              ref="userInput"
+              @keydown.enter="fetchData"
+              @keyup.enter="fetchData"
+            />
+            <button class="clear-button" @click="clearBox" tabindex="-1"
+              >&times;</button
+            >
+          </div>
+          <div class="buttonBox">
+            <button @click="fetchData">Go</button>
+            <label
+              ><input
+                type="checkbox"
+                v-model="searchOnGoogleBooks"
+              />GoogleBooks</label
+            >
+          </div>
         </div>
+        <div class="database-record" v-cloak>{{databaseRecord}}</div>
+        <details>
+          <summary>Configure</summary>
+          <label>Title<input type="text" v-model="title" /></label>
+          <label class="sub"
+            >Subtitle<input type="text" v-model="subtitle" /><button
+              class="clear-button"
+              @click="clearSubtitle"
+              tabindex="-1"
+              >&times;</button
+            ></label
+          >
+          <label>Publisher<input type="text" v-model="publisherName" /></label>
+          <label>Publish Year<input type="tel" v-model="pubYear" /></label>
+          <label
+            >Tags (space-separated)<input type="text" v-model="authorInfo"
+          /></label>
+        </details>
+        <button
+          @click="copyFileName"
+          :class="{done:fileNameCopied}"
+          class="button-outline"
+          >Copy FileName</button
+        >
+        <div class="front-matter">
+          <textarea readonly tabindex="-1" v-model="frontMatter"></textarea>
+          <button @click="copyFrontMatter" :class="{done:frontMatterCopied}"
+            >Copy</button
+          >
+        </div>
+      </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.37/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        const toHalfWidth = (s) => {
-            return s.replace(/[\uff21-\uff3a\uff41-\uff5a\uff10-\uff19]/g, (s) => {
-                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-            });
-        }
+      const toHalfWidth = (s) => {
+        return s.replace(/[\uff21-\uff3a\uff41-\uff5a\uff10-\uff19]/g, (s) => {
+          return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+        });
+      };
 
-        const vm = Vue.createApp({
-            data: function () {
-                return {
-                    databaseRecord: "",
-                    bookNum: "",
-                    searchOnGoogleBooks: false,
-                    title: "",
-                    subtitle: "",
-                    publisherName: "",
-                    pubYear: "",
-                    authorInfo: "",
-                    frontMatterCopied: false,
-                    fileNameCopied: false,
+      const vm = Vue.createApp({
+        data: function () {
+          return {
+            databaseRecord: "",
+            bookNum: "",
+            searchOnGoogleBooks: false,
+            title: "",
+            subtitle: "",
+            publisherName: "",
+            pubYear: "",
+            authorInfo: "",
+            frontMatterCopied: false,
+            fileNameCopied: false,
+          };
+        },
+        computed: {
+          isbn: function () {
+            const s = ("00000000" + this.bookNum).substring(0, 16);
+            return "9784" + s.substring(s.length - 8, s.length);
+          },
+          checkDigit: function () {
+            const total = String(this.isbn)
+              .split("")
+              .map((n, i) => {
+                if (i % 2 == 0) {
+                  return Number(n);
                 }
-            },
-            computed: {
-                isbn: function () {
-                    const s = ("00000000" + this.bookNum).substring(0, 16);
-                    return "9784" + s.substring(s.length - 8, s.length);
-                },
-                checkDigit: function () {
-                    const total = String(this.isbn).split("").map((n, i) => {
-                        if (i % 2 == 0) {
-                            return Number(n);
-                        }
-                        return Number(n) * 3;
-                    }).reduce((accum, x) => {
-                        return accum + Number(x)
-                    }, 0);
-                    return ((10 - (total % 10))) % 10;
-                },
-                isbnFull: function () {
-                    return `${this.isbn}${this.checkDigit}`;
-                },
-                isbnFormat: function () {
-                    const s = this.isbnFull;
-                    return s.substring(0, 3) + "-" + s.substring(3, 4) + "-" + s.substring(4, 12) + "-" + s.substring(12, 13);
-                },
-                authors: function () {
-                    return this.authorInfo.split(/\s/).map(x => x.split("／")[0].trim()).map(x => {
-                        return x.replace(/(?<![a-z]),/g, "").replace(/\d{4}-/g, "")
-                    }).filter(x => x.length).map(x => "  - " + x);
-                },
-                titleFormatted: function () {
-                    return toHalfWidth(this.title).trim();
-                },
-                fullTitleFormatted: function () {
-                    return this.titleFormatted + "\u2015\u2015" + this.subtitle.trim();
-                },
-                aliases: function () {
-                    const lines = [this.titleFormatted];
-                    if (this.subtitle.length && this.subtitle !== lines[0]) {
-                        lines.push(this.fullTitleFormatted);
-                    }
-                    return lines.filter(t => 0 < t.length).map(t => "  - " + t);
-                },
-                frontMatter: function () {
-                    return [
-                        "---",
-                        "aliases:",
-                        this.aliases.join("\n"),
-                        "isbn: " + this.isbnFull,
-                        "from: " + this.publisherName,
-                        "year: " + this.pubYear,
-                        "tags:",
-                        this.authors.join("\n"),
-                        "---",
-                        "",
-                    ].join("\n");
+                return Number(n) * 3;
+              })
+              .reduce((accum, x) => {
+                return accum + Number(x);
+              }, 0);
+            return (10 - (total % 10)) % 10;
+          },
+          isbnFull: function () {
+            return `${this.isbn}${this.checkDigit}`;
+          },
+          isbnFormat: function () {
+            const s = this.isbnFull;
+            return (
+              s.substring(0, 3) +
+              "-" +
+              s.substring(3, 4) +
+              "-" +
+              s.substring(4, 12) +
+              "-" +
+              s.substring(12, 13)
+            );
+          },
+          authors: function () {
+            return this.authorInfo
+              .split(/\s/)
+              .map((x) => x.split("／")[0].trim())
+              .map((x) => {
+                return x.replace(/(?<![a-z]),/g, "").replace(/\d{4}-/g, "");
+              })
+              .filter((x) => x.length)
+              .map((x) => "  - " + x);
+          },
+          titleFormatted: function () {
+            return toHalfWidth(this.title).trim();
+          },
+          fullTitleFormatted: function () {
+            return this.titleFormatted + "\u2015\u2015" + this.subtitle.trim();
+          },
+          aliases: function () {
+            const lines = [this.titleFormatted];
+            if (this.subtitle.length && this.subtitle !== lines[0]) {
+              lines.push(this.fullTitleFormatted);
+            }
+            return lines.filter((t) => 0 < t.length).map((t) => "  - " + t);
+          },
+          frontMatter: function () {
+            return [
+              "---",
+              "aliases:",
+              this.aliases.join("\n"),
+              "isbn: " + this.isbnFull,
+              "from: " + this.publisherName,
+              "year: " + this.pubYear,
+              "tags:",
+              this.authors.join("\n"),
+              "---",
+              "",
+            ].join("\n");
+          },
+        },
+        methods: {
+          clearBox: function () {
+            this.bookNum = "";
+          },
+          clearSubtitle: function () {
+            this.subtitle = "";
+          },
+          resetInfo: function () {
+            this.title = "";
+            this.subtitle = "";
+            this.publisherName = "";
+            this.pubYear = "";
+            this.authorInfo = "";
+          },
+          resetCopyStatus: function () {
+            this.frontMatterCopied = false;
+            this.fileNameCopied = false;
+          },
+          fetchOpenBD: function () {
+            this.resetInfo();
+            this.resetCopyStatus();
+            axios
+              .get(`https://api.openbd.jp/v1/get?isbn=${this.isbnFull}`)
+              .then((response) => {
+                if (response.data[0]) {
+                  const summary = response.data[0].summary;
+                  this.databaseRecord = summary.title;
+                  this.title = summary.title;
+                  this.subtitle =
+                    response.data[0].onix.DescriptiveDetail.TitleDetail
+                      .TitleElement.TitleText.content || "";
+                  this.publisherName = toHalfWidth(summary.publisher);
+                  this.pubYear = summary.pubdate.substring(0, 4);
+                  this.authorInfo = toHalfWidth(summary.author);
                 }
-            },
-            methods: {
-                clearBox: function () {
-                    this.bookNum = "";
-                },
-                clearSubtitle: function () {
-                    this.subtitle = "";
-                },
-                resetInfo: function () {
-                    this.title = "";
-                    this.subtitle = "";
-                    this.publisherName = "";
-                    this.pubYear = "";
-                    this.authorInfo = "";
-                },
-                resetCopyStatus: function () {
-                    this.frontMatterCopied = false;
-                    this.fileNameCopied = false;
-                },
-                fetchOpenBD: function () {
-                    this.resetInfo();
-                    this.resetCopyStatus();
-                    axios.get(`https://api.openbd.jp/v1/get?isbn=${this.isbnFull}`).then(response => {
-                        if (response.data[0]) {
-                            const summary = response.data[0].summary;
-                            this.databaseRecord = summary.title;
-                            this.title = summary.title;
-                            this.subtitle = response.data[0].onix.DescriptiveDetail.TitleDetail.TitleElement.TitleText.content || "";
-                            this.publisherName = toHalfWidth(summary.publisher);
-                            this.pubYear = summary.pubdate.substring(0, 4);
-                            this.authorInfo = toHalfWidth(summary.author);
-                        }
-                    });
-                },
-                fetchGoogleBooks: function () {
-                    this.resetInfo();
-                    this.resetCopyStatus();
-                    axios.get(`https://www.googleapis.com/books/v1/volumes?q=isbn:${this.isbnFull}`).then(response => {
-                        if (response.data.items) {
-                            const vInfo = response.data.items[0].volumeInfo;
-                            this.databaseRecord = vInfo.title;
-                            this.title = vInfo.title;
-                            this.subtitle = vInfo.subtitle || "";
-                            this.publisherName = toHalfWidth(vInfo.publisher || "");
-                            this.pubYear = (vInfo.publishedDate || "").substring(0, 4);
-                            this.authorInfo = toHalfWidth(vInfo.authors.join(" "));
-                        }
-                    })
-                },
-                fetchData: function () {
-                    if (this.searchOnGoogleBooks) {
-                        this.fetchGoogleBooks();
-                    }
-                    else {
-                        this.fetchOpenBD();
-                    }
-                },
-                copyFrontMatter: function () {
-                    navigator.clipboard.writeText(this.frontMatter);
-                    this.frontMatterCopied = true;
-                },
-                copyFileName: function () {
-                    if (0 < this.bookNum.length) {
-                        navigator.clipboard.writeText(this.isbnFull);
-                    }
-                    else {
-                        const d = new Date();
-                        var yyyy = d.getFullYear();
-                        var mm = ("0" + d.getMonth()).slice(-2);
-                        var dd = ("0" + d.getDay()).slice(-2);
-                        const name = "no-isbn-" + yyyy + mm + dd + "-";
-                        navigator.clipboard.writeText(name);
-                    }
-                    this.fileNameCopied = true;
-                },
-            },
-            watch: {
-                bookNum: function () {
-                    this.resetInfo();
-                    this.resetCopyStatus();
-                },
-                frontMatter: function () {
-                    this.resetCopyStatus();
-                },
-            },
-        }).mount("#app");
+              });
+          },
+          fetchGoogleBooks: function () {
+            this.resetInfo();
+            this.resetCopyStatus();
+            axios
+              .get(
+                `https://www.googleapis.com/books/v1/volumes?q=isbn:${this.isbnFull}`,
+              )
+              .then((response) => {
+                if (response.data.items) {
+                  const vInfo = response.data.items[0].volumeInfo;
+                  this.databaseRecord = vInfo.title;
+                  this.title = vInfo.title;
+                  this.subtitle = vInfo.subtitle || "";
+                  this.publisherName = toHalfWidth(vInfo.publisher || "");
+                  this.pubYear = (vInfo.publishedDate || "").substring(0, 4);
+                  this.authorInfo = toHalfWidth(vInfo.authors.join(" "));
+                }
+              });
+          },
+          fetchData: function () {
+            if (this.searchOnGoogleBooks) {
+              this.fetchGoogleBooks();
+            } else {
+              this.fetchOpenBD();
+            }
+          },
+          copyFrontMatter: function () {
+            navigator.clipboard.writeText(this.frontMatter);
+            this.frontMatterCopied = true;
+          },
+          copyFileName: function () {
+            if (0 < this.bookNum.length) {
+              navigator.clipboard.writeText(this.isbnFull);
+            } else {
+              const d = new Date();
+              var yyyy = d.getFullYear();
+              var mm = ("0" + d.getMonth()).slice(-2);
+              var dd = ("0" + d.getDay()).slice(-2);
+              const name = "no-isbn-" + yyyy + mm + dd + "-";
+              navigator.clipboard.writeText(name);
+            }
+            this.fileNameCopied = true;
+          },
+        },
+        watch: {
+          bookNum: function () {
+            this.resetInfo();
+            this.resetCopyStatus();
+          },
+          frontMatter: function () {
+            this.resetCopyStatus();
+          },
+        },
+      }).mount("#app");
     </script>
-</body>
-
+  </body>
 </html>
